@@ -1,0 +1,100 @@
+<?php
+
+/**
+ * @file
+ * Performs module install and uninstall tasks.
+ *
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+
+require 'php_scrapper_goutte/src/goutte_requests.php';
+
+ function parser_reviews_install() {
+
+  cache_clear_all('parser_reviews', 'cache', TRUE);
+	drupal_uninstall_schema('parser_reviews');
+	menu_rebuild();
+
+/*
+  variable_set(
+    'init_array', 
+    array(
+      'email' => 'c.perks@ctidigital.com',
+      'telephone' => '+44 (0) 845 620 0014',
+      'address' => array(
+        'value' => '<p>47 Newton Street<br />Manchester<br />M1 1FT</p>',
+        'format' => 'full_html',
+      ),
+      'image' => '',
+
+    )
+  ); */
+}
+
+
+function parser_reviews_schema()
+{
+	$schema['parser_reviews'] = array(
+    'description' => t('Table for Yandex Reviews'),
+		'fields'      => array(
+			'id'         => array(
+        'type' => 'int',  
+        'not null' => TRUE,
+        'size' => 'normal',
+        'default' => 0,
+        'auto increment' => TRUE
+      ),
+			'athor'       => array(
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE
+      ),
+			'link'        => array(
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE
+      ),
+			'created_at' => array(
+        'type' => 'int', 
+        'not null' => TRUE
+      ),
+			'img_link' => array(
+        'type' => 'int', 
+        'not null' => TRUE
+      ),
+			'text' => array(
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE
+      ),
+		),
+		'primary key' => array('id')
+	);
+
+	return $schema;
+}
+
+
+
+
+
+function parser_reviews_enable(){
+  $output=null;
+  $retval=null;
+  
+  $res = getReviewsYandexMap();
+  variable_set('res_command', $res);
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+
+function parser_reviews_uninstall() {
+  variable_del('init_array');
+}

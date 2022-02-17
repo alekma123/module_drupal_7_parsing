@@ -1,0 +1,8 @@
+
+name = Custom Parser reviews
+description = Парсер отзывов со страницы Яндекс Карты.
+core = 7.x
+package = Custom
+version = 1.0.0
+dependencies[] = block
+;dependencies[] = views

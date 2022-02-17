@@ -1,0 +1,165 @@
+<?php
+
+/**
+ * @file
+ * Custom module for displaying contact information.
+ * (c) Mirsaitov
+ * 
+ * @author Menshikova
+ */
+
+
+/**
+ * Implements hook_help().
+ */
+function parser_reviews_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#parser_reviews':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Парсер отзывов со страницы <a href="@yandex-map">Яндекс карты</a> позволяет брать последние 50 опубликованныз отзывов.', array('@yandex-map' => 'https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8')) . '</p>';
+      
+      return $output;   
+  }
+}
+
+
+/**
+ * Implements hook_block_info().
+ */
+function parser_reviews_block_info() {
+  $blocks = array();
+  $blocks['block_parser_reviews'] = array(  //defining a block called 'block_parser_reviews'
+    'info' => t('Парсер отзывов'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ */
+
+function parser_reviews_block_configure($delta = '') {
+  $form = array();
+  $url = "https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8";
+  
+  switch($delta) {
+    case 'block_parser_reviews' :
+      
+      $form['settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Settings'),
+        '#collapsible' => TRUE, // Added
+        '#collapsed' => FALSE,  // Added
+      );      
+
+      $form['settings']['url_parser_reviews'] = array(
+        '#type' => 'textfield',
+        '#title' => t('URL-страницы'),
+        '#required' => TRUE,
+        '#default_value' => variable_get('url_parser_reviews', $url),
+      );
+
+      $form['settings']['rating_parser_reviews'] = array(
+        '#type' => 'select',
+        '#title' => t('Минимальный рейтинг'),
+        '#default_value' => variable_get('rating_parser_reviews', 5),
+        '#options' => drupal_map_assoc(array(
+          1,
+          2,
+          3,
+          4,
+          5,
+        )),
+      );
+
+      $form['settings']['update_parser_reviews'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Обновить отзывы'),
+        '#default_value' => variable_get('update_parser_reviews', false),
+      );
+
+      $form['settings']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save')
+      );
+
+      break;
+  }
+  return $form;
+}
+
+
+/**
+ * Implements hook_block_save
+ */
+function parser_reviews_block_save($delta = '', $edit = array()) {
+  if ($delta == 'block_parser_reviews') {
+ 
+    variable_set('url_parser_reviews', $edit['url_parser_reviews']);
+    variable_set('rating_parser_reviews', $edit['rating_parser_reviews']);
+    variable_set('update_parser_reviews', $edit['update_parser_reviews']);
+
+  }
+}
+ 
+
+function parser_reviews_block_view($delta='') {
+  $block = array();
+    if($delta == 'block_parser_reviews'){
+ 
+      $items = array();
+      $reviews = array();
+ 
+      // URL
+      if(variable_get('url_parser_reviews')){
+        $items[] = variable_get('url_parser_reviews');
+      };
+ 
+      // Рейтинг
+      if(variable_get('rating_parser_reviews')){
+        $items[] = variable_get('rating_parser_reviews');
+      }
+
+      // Обновить
+      if(variable_get('update_parser_reviews')){
+        $items[] = variable_get('update_parser_reviews');
+      }
+
+      $reviews[] = variable_get('res_command');
+
+      var_dump(variable_get('res_command'));
+      
+ 
+      $title = 'View field block';
+      $type = 'ul';
+ 
+      $output = theme_item_list(
+        array('items' => $items, 'title' => $title, 'reviews' => $reviews, 'type' => $type, 'attributes' => array() )
+      );
+ 
+      $block['subject'] = 'Parsing block'; 
+      $block['content'] = $output;
+      
+      /*
+      $block = array(
+        'title' => array(
+          '#prefix ' => '',
+          "#type" => 'markup',
+          '#markup' => $title
+        ),
+        'items' => array(
+          '#prefix ' => '',
+          "#type" => 'markup',
+          '#markup' => $items
+        ),
+      ); */
+
+
+    }
+  return $block;
+}
+
+
