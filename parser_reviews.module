@@ -103,6 +103,7 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
     variable_set('update_parser_reviews', $edit['update_parser_reviews']);
 
   }
+  
 }
  
 
@@ -130,14 +131,17 @@ function parser_reviews_block_view($delta='') {
 
       $reviews[] = variable_get('res_command');
 
-      var_dump(variable_get('res_command'));
+      $items[] = $reviews;
+
+      // var_dump(variable_get('res_command'));
+      var_dump($reviews);
       
  
       $title = 'View field block';
       $type = 'ul';
  
       $output = theme_item_list(
-        array('items' => $items, 'title' => $title, 'reviews' => $reviews, 'type' => $type, 'attributes' => array() )
+        array('title' => $title, 'items' => $reviews[0], 'type' => $type, 'attributes' => array() )
       );
  
       $block['subject'] = 'Parsing block'; 

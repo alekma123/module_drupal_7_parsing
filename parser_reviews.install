@@ -35,7 +35,7 @@ require 'php_scrapper_goutte/src/goutte_requests.php';
   ); */
 }
 
-
+/*
 function parser_reviews_schema()
 {
 	$schema['parser_reviews'] = array(
@@ -79,7 +79,7 @@ function parser_reviews_schema()
 }
 
 
-
+*/
 
 
 function parser_reviews_enable(){
