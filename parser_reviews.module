@@ -7,7 +7,7 @@
  * 
  * @author Menshikova
  */
-
+require 'php_scrapper_goutte/src/goutte_requests.php';
 /**
  * Implements hook_help().
  */
@@ -55,7 +55,8 @@ function parser_reviews_block_configure($delta = '') {
       );      
 
       $form['settings']['url_parser_reviews'] = array(
-        '#type' => 'textfield',
+        // '#type' => 'textfield',
+        '#type' => 'textarea',
         '#title' => t('URL-страницы'),
         '#required' => TRUE,
         '#default_value' => variable_get('url_parser_reviews', $url),
@@ -102,7 +103,23 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
     variable_set('update_parser_reviews', $edit['update_parser_reviews']);
 
   }
+
+  $res = getReviewsYandexMap($edit['url_parser_reviews']);
+
   
+  //if (variable_get('update_parser_reviews')){
+    //   $count = db_query("
+    //   SELECT COUNT(*)
+    //   FROM {node} n
+    //   WHERE n.type = 'reviews_yandex_map'
+    // ")->fetchField();
+  //}
+
+  //variable_set('count', $count);
+  
+  addNodeReview($res);
+
+
 }
  
 
@@ -130,39 +147,71 @@ function parser_reviews_block_view($delta='') {
 
       $reviews[] = variable_get('res_command');
 
-      $items[] = $reviews;
-
-      // var_dump(variable_get('res_command'));
-      var_dump($reviews);
       
  
-      $title = 'View field block';
+      $title = 'Отзывы';
       $type = 'ul';
  
       $output = theme_item_list(
-        array('title' => $title, 'items' => $reviews[0], 'type' => $type, 'attributes' => array() )
+        array('title' => $title, 'items' => $items, 'type' => $type, 'attributes' => array() )
       );
  
       $block['subject'] = 'Parsing block'; 
-      $block['content'] = $output;
+      // $block['content'] = $output;
       
-      /*
-      $block = array(
-        'title' => array(
-          '#prefix ' => '',
-          "#type" => 'markup',
-          '#markup' => $title
-        ),
-        'items' => array(
-          '#prefix ' => '',
-          "#type" => 'markup',
-          '#markup' => $items
-        ),
-      ); */
-
-
+     
     }
   return $block;
 }
 
 
+
+function addNodeReview($review, $nid = null) {
+  $node = new stdClass();
+  $node->type = 'reviews_yandex_map';
+  node_object_prepare($node);
+  $node->title = $review['title'];
+  $node->field_url_avatar_author_review['und'][0]['value'] = $review['imgSrc'];
+  $node->field_url_link_author_review['und'][0]['value'] = $review['link'];
+  
+  $node->field_text_review['und'][0]['value'] = $review['text'];
+  $node->field_rating_review['und'][0]['value'] = $review['rating'];
+  $node->field_date_created_review['und'][0]['value'] = $review['date'];
+
+
+  // $node->language = LANGUAGE_NONE;
+  node_save($node);
+};
+
+
+function delNodesByTypeContent(){
+  $count = db_query("
+      SELECT COUNT(*)
+      FROM {node} n
+      WHERE n.type = 'reviews_yandex_map'
+    ")->fetchField();
+}
+function countNodesByTypeContent(){
+  $count = db_query("
+      SELECT COUNT(*)
+      FROM {node} n
+      WHERE n.type = 'reviews_yandex_map'
+    ")->fetchField();
+}
+
+
+
+
+  /**
+     * Implements hook_theme().
+     */
+    function parser_reviews_theme($existing, $type, $theme, $path) {
+      $theme = array();
+      $theme['node__reviews_yandex_map'] = array(
+        'render element' => 'content',
+        'base hook' => 'node',
+        'template' => 'node--reviews_yandex_map',
+        'path' => drupal_get_path('module', 'parser_reviews') . '/templates',
+       );
+      return $theme;
+    }

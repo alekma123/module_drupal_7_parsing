@@ -85,9 +85,9 @@ function parser_reviews_schema()
 function parser_reviews_enable(){
   $output=null;
   $retval=null;
-  
+  /*
   $res = getReviewsYandexMap();
-  variable_set('res_command', $res);
+  variable_set('res_command', $res); */
 }
 
 
