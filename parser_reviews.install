@@ -96,5 +96,5 @@ function parser_reviews_enable(){
  */
 
 function parser_reviews_uninstall() {
-  variable_del('init_array');
+  // variable_del('init_array');
 }
