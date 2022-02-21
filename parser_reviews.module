@@ -22,7 +22,6 @@ function parser_reviews_help($path, $arg) {
   }
 }
 
-
 /**
  * Implements hook_block_info().
  */
@@ -104,24 +103,58 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
 
   }
 
-  $res = getReviewsYandexMap($edit['url_parser_reviews']);
+  if (strlen($edit['url_parser_reviews']) > 0 ) {
+
+    $reviews = getReviewsYandexMap($edit['url_parser_reviews']);
 
   
-  //if (variable_get('update_parser_reviews')){
-    //   $count = db_query("
-    //   SELECT COUNT(*)
-    //   FROM {node} n
-    //   WHERE n.type = 'reviews_yandex_map'
-    // ")->fetchField();
-  //}
+    if (variable_get('update_parser_reviews')){
+      // вернуть отзывы, что нет в БД (nodes)
+      $newReviews = getNewReview($reviews);
+      // если присутствуют недобавленные отзывы
+      if (count($newReviews) > 0) {
+        // добавляем каждый отзыв
+        foreach ($newReviews as $key => $newReview) {
+          addNodeReview($newReview);
+        }  
+      }
+    } 
 
-  //variable_set('count', $count);
-  
-  addNodeReview($res);
+    getUrl($edit['url_parser_reviews']);
+
+  }
 
 
 }
  
+
+function getNewReview($newReviews) {
+
+  $query = db_select('node', 'n');
+  $query->innerJoin('field_data_field_date_created_review', 'dcr', 'n.vid = dcr.entity_id'); 
+  $query->fields('n', array('title'));
+  $query->fields('dcr', array('field_date_created_review_value'));
+  $result = $query->execute();
+  $index = 0;
+  $newNodes = [];
+  foreach ($result as $row) {
+    //dpm($row);
+    if (($newReviews[$index]['date'] == $row->field_date_created_review_value) && ($newReviews[$index]['title'] == $row->title)) {
+      dpm($row);
+      continue;
+    } else {
+      $newNodes[] = $newReviews[$index];      
+
+    }
+    $index++;
+  }
+
+  // dpm($newNodes);
+  return $newNodes;
+}
+
+
+
 
 function parser_reviews_block_view($delta='') {
   $block = array();
@@ -147,8 +180,9 @@ function parser_reviews_block_view($delta='') {
 
       $reviews[] = variable_get('res_command');
 
-      /*
- 
+      //getUrl(variable_get('url_parser_reviews'));
+      
+      /*  
       $title = 'Отзывы';
       $type = 'ul';
  
@@ -158,7 +192,6 @@ function parser_reviews_block_view($delta='') {
  
       $block['subject'] = 'Parsing block'; 
       $block['content'] = $output; */
-      
      
     }
   return $block;
@@ -177,11 +210,10 @@ function addNodeReview($review, $nid = null) {
   $node->field_text_review['und'][0]['value'] = $review['text'];
   $node->field_rating_review['und'][0]['value'] = $review['rating'];
   $node->field_date_created_review['und'][0]['value'] = $review['date'];
-
-
   // $node->language = LANGUAGE_NONE;
   node_save($node);
 };
+
 
 
 function delNodesByTypeContent(){
@@ -202,7 +234,13 @@ function countNodesByTypeContent(){
 }
 
 
+function getUrl($url){
+  $pattern = "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i";
 
+  preg_match($pattern, $url, $matches);
+  dpm($matches);
+
+}
 
   /**
      * Implements hook_theme().

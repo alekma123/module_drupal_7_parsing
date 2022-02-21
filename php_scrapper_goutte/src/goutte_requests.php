@@ -3,8 +3,6 @@
 <?php
 # scraping books to scrape:https://yandex.ru/maps/org/
 
-
-
 function getReviewsYandexMap($URL) {
   require (dirname(__FILE__) . '/../vendor/autoload.php');
 
@@ -60,8 +58,11 @@ function getReviewsYandexMap($URL) {
 });
 
 //var_dump($arrayNode[1]);
+$arr = [];
+$arr [] = $arrayNode[0];
+$arr [] = $arrayNode[1];
 
-return $arrayNode[1];
+return $arr;
 
 }
 
