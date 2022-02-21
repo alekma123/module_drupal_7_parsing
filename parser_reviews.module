@@ -147,7 +147,7 @@ function parser_reviews_block_view($delta='') {
 
       $reviews[] = variable_get('res_command');
 
-      
+      /*
  
       $title = 'Отзывы';
       $type = 'ul';
@@ -157,7 +157,7 @@ function parser_reviews_block_view($delta='') {
       );
  
       $block['subject'] = 'Parsing block'; 
-      // $block['content'] = $output;
+      $block['content'] = $output; */
       
      
     }
@@ -191,6 +191,8 @@ function delNodesByTypeContent(){
       WHERE n.type = 'reviews_yandex_map'
     ")->fetchField();
 }
+
+
 function countNodesByTypeContent(){
   $count = db_query("
       SELECT COUNT(*)

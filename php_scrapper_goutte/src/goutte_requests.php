@@ -3,21 +3,14 @@
 <?php
 # scraping books to scrape:https://yandex.ru/maps/org/
 
-// require (dirname(__FILE__) . '/../vendor/autoload.php');
-
-
 
 
 function getReviewsYandexMap($URL) {
   require (dirname(__FILE__) . '/../vendor/autoload.php');
-  //global $arrayNode, $arrayIndex, $pattern;
-
-  // $URL = "https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.025757%2C61.178628&mode=search&sll=73.420619%2C61.265078&source=serp_navig&sspn=4.641724%2C1.936356&tab=reviews&text=%D1%84%D0%BE%D1%80%D0%B2%D0%B0%D1%80%D0%B4%20%D0%B0%D0%B2%D1%82%D0%BE&z=10";
 
   $arrayNode = [];
   $arrayIndex = 0;
   $pattern = "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i";
-
 
 
   $httpClient = new \Goutte\Client();
@@ -73,23 +66,8 @@ return $arrayNode[1];
 }
 
 
-//getReviewsYandexMap();
 
 
-  function insertDataBD() {
-
-  } 
-
-  function getDataByQuery() {
-
-  }
-
-  function getRatingByOrder($order){
-
-  }
-
-//$json = json_encode($arrayNode);
-//var_dump($json); 
 
 ?>
 
