@@ -124,12 +124,40 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
 
   }
 
+  
+
 
 }
  
 
 function getNewReview($newReviews) {
+  
+  $index = 0;
+  $newNodes = [];
 
+  $query = db_select('node', 'n');
+  $query->innerJoin('field_data_field_date_created_review', 'dcr', 'n.vid = dcr.entity_id'); 
+  $query->fields('n', array('title'));
+  $query->fields('dcr', array('field_date_created_review_value'));
+  $resQuery = $query->execute()->fetchAll();
+
+  dpm($newReviews[0]);
+  dpm($resQuery[0]);
+
+
+  foreach ($newReviews as $key => $nd) { 
+    if (! in_array(
+      array("title" -> $nd["title"], 
+            "field_date_created_review_value" -> $nd["date"]
+          ), 
+            $resQuery)
+    ) {
+      $newNodes [] = $nd;
+    } 
+  }
+
+
+  /*
   $query = db_select('node', 'n');
   $query->innerJoin('field_data_field_date_created_review', 'dcr', 'n.vid = dcr.entity_id'); 
   $query->fields('n', array('title'));
@@ -138,8 +166,7 @@ function getNewReview($newReviews) {
   $index = 0;
   $newNodes = [];
   foreach ($result as $row) {
-    //dpm($row);
-    if (($newReviews[$index]['date'] == $row->field_date_created_review_value) && ($newReviews[$index]['title'] == $row->title)) {
+     if (($newReviews[$index]['date'] == $row->field_date_created_review_value) && ($newReviews[$index]['title'] == $row->title)) {
       dpm($row);
       continue;
     } else {
@@ -148,8 +175,7 @@ function getNewReview($newReviews) {
     }
     $index++;
   }
-
-  // dpm($newNodes);
+  */
   return $newNodes;
 }
 
