@@ -57,7 +57,6 @@ function getReviewsYandexMap($URL) {
 
 });
 
-//var_dump($arrayNode[1]);
 $arr = [];
 $arr [] = $arrayNode[0];
 $arr [] = $arrayNode[1];
@@ -66,8 +65,8 @@ return $arr;
 
 }
 
-
-
+// $output = var_dump(getReviewsYandexMap("https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8"));
+// echo $output;
 
 
 ?>
