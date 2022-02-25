@@ -1,6 +1,6 @@
 
-name = Custom Parser reviews
-description = Парсер отзывов со страницы Яндекс Карты.
+name = Parser reviews
+description = Парсер последних 50 отзывов с Яндекс Карты.
 core = 7.x
 package = Custom
 version = 1.0.0

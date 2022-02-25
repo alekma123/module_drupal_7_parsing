@@ -49,7 +49,7 @@ function getReviewsYandexMap($URL) {
     });
 
     $node->filter('div.business-review-view__body')->each(function($node1) use (&$arrayNode, &$arrayIndex) {
-      $arrayNode[$arrayIndex]['text'] = $node1->text();
+      $arrayNode[$arrayIndex]['text'] = removeEmojis($node1->text());
     });
  
  
@@ -65,9 +65,18 @@ return $arr;
 
 }
 
-// $output = var_dump(getReviewsYandexMap("https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8"));
-// echo $output;
+function removeEmojis($string) {
+  return preg_replace('%(?:
+        \xF0[\x90-\xBF][\x80-\xBF]{2}      
+      | [\xF1-\xF3][\x80-\xBF]{3}          
+      | \xF4[\x80-\x8F][\x80-\xBF]{2}      
+  )%xs', '', $string);    
+}
 
+
+//$output = getReviewsYandexMap("https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8");
+//$string = $output[0]["text"];
+//echo $string;
 
 ?>
 

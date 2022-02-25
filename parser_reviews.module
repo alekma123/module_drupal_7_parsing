@@ -23,9 +23,11 @@ function parser_reviews_help($path, $arg) {
   }
 }
 
+
 /**
  * Implements hook_block_info().
  */
+
 function parser_reviews_block_info() {
   $blocks = array();
   $blocks['block_parser_reviews'] = array(  //defining a block called 'block_parser_reviews'
@@ -39,7 +41,8 @@ function parser_reviews_block_info() {
 /**
  * Implements hook_block_configure().
  */
-function parser_reviews_block_configure($delta = '') {
+
+ function parser_reviews_block_configure($delta = '') {
   $form = array();
   $url = "https://yandex.ru/maps/org/forvard_avto_lada_ofitsialny_diler/1112596902/reviews/?from=tabbar&ll=73.420619%2C61.265078&source=serp_navig&z=8";
   
@@ -94,36 +97,14 @@ function parser_reviews_block_configure($delta = '') {
 /**
  * Implements hook_block_save
  */
-function parser_reviews_block_save($delta = '', $edit = array()) {
+
+ function parser_reviews_block_save($delta = '', $edit = array()) {
   if ($delta == 'block_parser_reviews') {
  
     variable_set('url_parser_reviews', $edit['url_parser_reviews']);
     variable_set('rating_parser_reviews', $edit['rating_parser_reviews']);
     variable_set('update_parser_reviews', $edit['update_parser_reviews']);
-
   }
-/*
-  if (strlen($edit['url_parser_reviews']) > 0 ) {
-
-    $reviews = getReviewsYandexMap($edit['url_parser_reviews']);
-    $reviews = convToArray($reviews);
-  
-    if (variable_get('update_parser_reviews')){
-      // вернуть отзывы, что нет в БД (nodes)
-      $newReviews = getNewReview($reviews);
-      // если присутствуют недобавленные отзывы
-      if (count($newReviews) > 0) {
-        // добавляем каждый отзыв
-        foreach ($newReviews as $key => $newReview) {
-          addNodeReview($newReview);
-        }  
-      }
-    } 
-
-    getUrl($edit['url_parser_reviews']);
-
-  } */
-
 
   if (strlen($edit['url_parser_reviews']) > 0 ) {
     $newReviews = getReviewsYandexMap($edit['url_parser_reviews']);
@@ -137,7 +118,7 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
     $resQuery = convToArray($resQuery);
 
     foreach ($newReviews as $key => $nd) { 
-        echo $nd["title"].":".$nd["date"].";"."\n";
+      //  echo $nd["title"].":".$nd["date"].";"."\n";
         if (!in_array(array("title" => $nd["title"], "field_date_created_review_value" => $nd["date"]), $resQuery) ) {
               addNodeReview($nd);
             };
@@ -148,6 +129,7 @@ function parser_reviews_block_save($delta = '', $edit = array()) {
 }
  
 
+/*
 function getNewReview($newReviews) {
   
   $index = 0;
@@ -176,30 +158,12 @@ function getNewReview($newReviews) {
   }
 
 
-  /*
-  $query = db_select('node', 'n');
-  $query->innerJoin('field_data_field_date_created_review', 'dcr', 'n.vid = dcr.entity_id'); 
-  $query->fields('n', array('title'));
-  $query->fields('dcr', array('field_date_created_review_value'));
-  $result = $query->execute();
-  $index = 0;
-  $newNodes = [];
-  foreach ($result as $row) {
-     if (($newReviews[$index]['date'] == $row->field_date_created_review_value) && ($newReviews[$index]['title'] == $row->title)) {
-      dpm($row);
-      continue;
-    } else {
-      $newNodes[] = $newReviews[$index];      
 
-    }
-    $index++;
-  }
-  */
   return $newNodes;
 }
 
 
-
+*/
 
 function parser_reviews_block_view($delta='') {
   $block = array();
@@ -225,28 +189,20 @@ function parser_reviews_block_view($delta='') {
 
       $reviews[] = variable_get('res_command');
 
-      //getUrl(variable_get('url_parser_reviews'));
-      
-      /*  
-      $title = 'Отзывы';
-      $type = 'ul';
- 
-      $output = theme_item_list(
-        array('title' => $title, 'items' => $items, 'type' => $type, 'attributes' => array() )
-      );
- 
-      $block['subject'] = 'Parsing block'; 
-      $block['content'] = $output; */
      
+      $block["subject"] = "test title";
+      $block["content"] = variable_get('rating_parser_reviews');
+
+
+
+    
     }
   return $block;
 }
 
 
-
 function addNodeReview($review, $nid = null) {
-  
-  //$review = (object) $review;
+
   dvm($review);
 
   $node = new stdClass();
@@ -256,11 +212,11 @@ function addNodeReview($review, $nid = null) {
   $node->field_url_avatar_author_review['und'][0]['value'] = $review['imgSrc'];
   $node->field_url_link_author_review['und'][0]['value'] = $review['link'];
   
- /* $node->body[LANGUAGE_NONE][0]['value'] = (string) $review['text'];
+  $node->body[LANGUAGE_NONE][0]['value'] = $review['text'];
   $node->body[LANGUAGE_NONE][0]['summary'] = '';
-  $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';*/
+  $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';
 
-  $node->field_text_review['und'][0]['value'] = $review['text'];
+  // $node->field_text_review['und'][0]['value'] = $review['text'];
   $node->field_rating_review['und'][0]['value'] = $review['rating'];
   $node->field_date_created_review['und'][0]['value'] = $review['date'];
   $node->language = LANGUAGE_NONE; 
@@ -270,29 +226,12 @@ function addNodeReview($review, $nid = null) {
 
 
 
-function delNodesByTypeContent(){
-  $count = db_query("
-      SELECT COUNT(*)
-      FROM {node} n
-      WHERE n.type = 'reviews_yandex_map'
-    ")->fetchField();
-}
-
-
-function countNodesByTypeContent(){
-  $count = db_query("
-      SELECT COUNT(*)
-      FROM {node} n
-      WHERE n.type = 'reviews_yandex_map'
-    ")->fetchField();
-}
-
-
 function getUrl($url){
   $pattern = "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i";
 
   preg_match($pattern, $url, $matches);
   dpm($matches);
+
 }
 
 
@@ -308,16 +247,14 @@ function convToArray($arrayNodes) {
 
 
 
-/**
-   * Implements hook_theme().
-   */
-  function parser_reviews_theme($existing, $type, $theme, $path) {
-    $theme = array();
-    $theme['node__reviews_yandex_map'] = array(
-      'render element' => 'content',
-      'base hook' => 'node',
-      'template' => 'node--reviews_yandex_map',
-      'path' => drupal_get_path('module', 'parser_reviews') . '/templates',
-      );
-    return $theme;
-  }
+function changeStatusPublishingNode($rating){
+  //$nodes = node_load_multiple($nids);
+  $type = "reviews_yandex_map";
+  $nodes = node_load_multiple(array(), array('type' => $type)); 
+  foreach ($nodes as $node) {
+    $node->status = 1;
+    node_save($node);
+ }
+}
+
+

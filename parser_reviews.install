@@ -7,94 +7,150 @@
  */
 
 
-/**
- * Implements hook_install().
- */
+function parser_reviews_enable() {
 
-require 'php_scrapper_goutte/src/goutte_requests.php';
+  $type_name = 'reviews_yandex_map';
+  $instance = [];
+  
+  // добавление типа материала
+  if ( in_array( $type_name, node_type_get_names() ) ) {
+    return;
+  } else {
+    node_type_delete($type_name);
+  }
+  $type = array(
+      'type' => $type_name,
+      'name' => t( 'Отзывы с Яндекс Карты' ),
+      'base' => 'node_content',
+      'description' => t( 'Отзывы с Яндекс Карты' ),
+      'title_label' => t('Автор отзыва')
+  );
+  $type = node_type_set_defaults( $type );
+  node_type_save( $type );
+  node_add_body_field( $type );
 
- function parser_reviews_install() {
+  variable_set($type_name, COMMENT_NODE_HIDDEN);
 
-  cache_clear_all('parser_reviews', 'cache', TRUE);
-	drupal_uninstall_schema('parser_reviews');
-	menu_rebuild();
+  // добавление полей к типу материала 
+  field_cache_clear();
+  field_associate_fields('parser_reviews');
 
-/*
-  variable_set(
-    'init_array', 
-    array(
-      'email' => 'c.perks@ctidigital.com',
-      'telephone' => '+44 (0) 845 620 0014',
-      'address' => array(
-        'value' => '<p>47 Newton Street<br />Manchester<br />M1 1FT</p>',
-        'format' => 'full_html',
+  if (!field_info_field('field_rating_review')) {
+    /*
+    $field = array(
+      'field_name' => 'field_rating_review',
+      'type' => 'list_text',
+      'settings' => array(
+        'allowed_values' => array(
+          'option1' => '4',
+          'option2' => '5',
+        ),
       ),
-      'image' => '',
+    ); */ 
+    $field = array('field_name' => 'field_rating_review', 'type' => 'text',);
+    $field = field_create_field($field);
 
-    )
-  ); */
-}
-
-/*
-function parser_reviews_schema()
-{
-	$schema['parser_reviews'] = array(
-    'description' => t('Table for Yandex Reviews'),
-		'fields'      => array(
-			'id'         => array(
-        'type' => 'int',  
-        'not null' => TRUE,
-        'size' => 'normal',
-        'default' => 0,
-        'auto increment' => TRUE
+     $instance['field_rating_review'] = array(
+      'field_name' => 'field_rating_review',
+      'entity_type' => 'node',
+      'bundle' => $type_name,
+      'label' => 'Рейтинг отзыва',
+      'description' => t('Рейтинг отзыва с Янекс Карты.'),
+      'widget' => array(
+        'type' => 'textfield',
       ),
-			'athor'       => array(
-        'type' => 'varchar', 
-        'length' => 255, 
-        'not null' => TRUE
-      ),
-			'link'        => array(
-        'type' => 'varchar', 
-        'length' => 255, 
-        'not null' => TRUE
-      ),
-			'created_at' => array(
-        'type' => 'int', 
-        'not null' => TRUE
-      ),
-			'img_link' => array(
-        'type' => 'int', 
-        'not null' => TRUE
-      ),
-			'text' => array(
-        'type' => 'varchar', 
-        'length' => 255, 
-        'not null' => TRUE
-      ),
-		),
-		'primary key' => array('id')
-	);
-
-	return $schema;
-}
+    );
+  } else {
+    field_delete_field('field_rating_review');
+    field_purge_batch(1);
+  } 
 
 
-*/
+  if (!field_info_field('field_url_avatar_author_review')) {
+    
+    $field = array('field_name' => 'field_url_avatar_author_review', 'type' => 'text_long',);
+    $field = field_create_field($field);
+
+    $instance['field_url_avatar_author_review'] = array(
+      'field_name' => 'field_url_avatar_author_review',
+      'entity_type' => 'node',
+      'bundle' => $type_name,
+      'label' => 'URL иконки',
+      'description' => t('URL иконки автара отзыва.'),
+      'widget' => array(
+        'type' => 'text_textarea',
+      ),
+    );
+  } 
+  else {
+    field_delete_field('field_url_avatar_author_review');
+    field_purge_batch(1);
+  }
+
+  if (!field_info_field('field_url_link_author_review')) {
+    
+    $field = array('field_name' => 'field_url_link_author_review', 'type' => 'text_long',);
+    $field = field_create_field($field);
+
+    $instance['field_url_link_author_review'] = array(
+      'field_name' => 'field_url_link_author_review',
+      'entity_type' => 'node',
+      'bundle' => $type_name,
+      'label' => 'Ссылка на автора отзыва',
+      'description' => t('Ссылка на автора отзыва.'),
+      'widget' => array(
+        'type' => 'text_textarea',
+      ),
+    );
+  } 
+  else {
+    field_delete_field('field_url_link_author_review');
+    field_purge_batch(1);
+  }
+
+  if (!field_info_field('field_date_created_review')) {
+    
+    $field = array('field_name' => 'field_date_created_review', 'type' => 'text',);
+    $field = field_create_field($field);
+
+    $instance['field_date_created_review'] = array(
+      'field_name' => 'field_date_created_review',
+      'entity_type' => 'node',
+      'bundle' => $type_name,
+      'label' => 'Дата создания отзыва',
+      'description' => t('Дата создания отзыва.'),
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'settings' => array(
+        'max_length' => 25,
+      ),
+    );
+  } 
+  else {
+    field_delete_field('field_date_created_review');
+    field_purge_batch(1);
+  }
+
+  dsm($instance);
+  if(!empty($instance)){
+    foreach ($instance as $instance_field){
+      field_create_instance($instance_field);
+    }
+   }
+
+} 
 
 
-function parser_reviews_enable(){
-  $output=null;
-  $retval=null;
-  /*
-  $res = getReviewsYandexMap();
-  variable_set('res_command', $res); */
-}
+
+
 
 
 /**
  * Implements hook_uninstall().
  */
 
-function parser_reviews_uninstall() {
+//function parser_reviews_uninstall() {
   // variable_del('init_array');
-}
+//}
+
